@@ -33,9 +33,6 @@ jobs:
       - name: Build
         run: hugo --minify
 
-      - name: Verify build output
-        run: ls -la public/
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
