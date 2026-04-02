@@ -30,12 +30,11 @@ jobs:
           tar -xzf /tmp/hugo.tar.gz -C /tmp
           sudo mv /tmp/hugo /usr/local/bin/hugo
 
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-
       - name: Build
-        run: hugo --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
+        run: hugo --minify
+
+      - name: Verify build output
+        run: ls -la public/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
