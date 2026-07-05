@@ -1,0 +1,45 @@
+{{- if .Param "math" }}
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    processEscapes: true
+  },
+  options: {
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+{{- end }}
+
+{{- if .Param "mermaid" }}
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+  const renderMermaid = async () => {
+    const blocks = document.querySelectorAll('pre > code.language-mermaid');
+    blocks.forEach((block) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mermaid';
+      wrapper.textContent = block.textContent;
+      block.parentElement.replaceWith(wrapper);
+    });
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default'
+    });
+
+    await mermaid.run({ querySelector: '.mermaid' });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMermaid, { once: true });
+  } else {
+    await renderMermaid();
+  }
+</script>
+{{- end }}
