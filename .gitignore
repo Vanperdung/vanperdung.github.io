@@ -2,3 +2,5 @@ public/
 .hugo_build.lock
 resources/
 .claude/
+AGENTS.md
+CLAUDE.md
