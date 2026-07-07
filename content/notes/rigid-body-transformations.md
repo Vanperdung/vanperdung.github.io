@@ -1,5 +1,5 @@
 +++
-title       = 'Bài học chi tiết: Phép biến đổi vật rắn'
+title       = '01 - Phép biến đổi vật rắn'
 date        = '2026-07-08T00:00:00+07:00'
 draft       = false
 description = 'Bài học về rigid body, pose, ma trận quay và ma trận biến đổi thuần nhất.'
@@ -7,7 +7,7 @@ tags        = ['Robotics', 'Rigid Body', 'Transformations']
 math        = true
 +++
 
-# Bài học chi tiết: Phép biến đổi vật rắn (Rigid-Body Transformations)
+# Phép biến đổi vật rắn (Rigid-Body Transformations)
 
 > **Phạm vi học:** Tài liệu này tổng hợp và mở rộng nội dung từ slide 1 đến slide 21 của bài *MEAM 620: Rigid Body Transformations*. Các thuật ngữ chuyên ngành được viết bằng tiếng Việt và kèm tiếng Anh trong ngoặc ở lần đầu xuất hiện.
 >
