@@ -13,7 +13,7 @@ math        = true
 
 This note explains the attitude-command ideas in **“Nonlinear Quadrocopter Attitude Control”** by Brescianini, Hehn, and D’Andrea. The main goal is to show how a quadrotor turns a desired motion into a desired attitude. It explains reduced attitude control, full attitude control, the mixing method used in the paper, and maximum tilt limiting. The language is kept simple, but the main equations are included so that the ideas can be used in an implementation.
 
-The paper uses unit quaternions and a particular multiplication convention. Different software libraries may use a different convention for quaternion order or frame direction. Therefore, do not copy a quaternion product blindly. After building a desired attitude, always check that the body thrust axis points in the desired direction when it is expressed in the world frame.
+This note uses unit quaternions that rotate body-frame vectors into the world frame. With this active convention, an attitude correction multiplies on the left. Different software libraries may use a different convention for quaternion order or frame direction. Therefore, do not copy a quaternion product blindly. After building a desired attitude, always check that the body thrust axis points in the desired direction when it is expressed in the world frame.
 
 ---
 
@@ -51,11 +51,15 @@ This leads to three useful control choices. Reduced attitude control uses only t
 
 ## 3. The quaternion attitude controller in the paper
 
-After a desired quaternion \(q_{\mathrm{cmd}}\) has been built, the paper defines the attitude error as
+After a desired quaternion \(q_{\mathrm{cmd}}\) has been built, calculate the left-multiplicative attitude error as
 
-\[q_e = q^{-1}\otimes q_{\mathrm{cmd}},\]
+\[q_e = q_{\mathrm{cmd}}\otimes q^{-1}.\]
 
-where \(q\) is the current attitude. This error quaternion describes the rotation needed to move from the current attitude to the commanded attitude.
+where \(q\) is the current attitude. Equivalently,
+
+\[q_{\mathrm{cmd}} = q_e\otimes q.\]
+
+This error quaternion describes the rotation needed to move from the current attitude to the commanded attitude. Its rotation axis is expressed in the world frame. If the rate controller expects a body-frame angular-rate command, convert the command consistently before using it.
 
 The paper uses the following angular-rate command:
 
@@ -95,9 +99,9 @@ The reduced error quaternion is
 
 \[q_{e,\mathrm{red}} = \begin{bmatrix} \cos(\alpha/2)\\ \mathbf{k}\sin(\alpha/2) \end{bmatrix}.\]
 
-Using the multiplication order of the paper, the reduced desired attitude is
+The reduced error is a world-frame rotation, so the reduced desired attitude is
 
-\[q_{\mathrm{cmd,red}} = q\otimes q_{e,\mathrm{red}}.\]
+\[q_{\mathrm{cmd,red}} = q_{e,\mathrm{red}}\otimes q.\]
 
 This target makes the thrust axis point exactly along \(\mathbf{b}_{3,d}\). It does not directly set a yaw target. That is why reduced attitude is good when the main task is to accelerate, brake, or follow a path quickly.
 
@@ -167,17 +171,17 @@ However, your geometric observation is still useful. If the quadrotor first rota
 
 ## 6. The meaning of \(q_{\mathrm{mix}}\)
 
-Reduced attitude and full attitude have the same desired thrust direction. Therefore, they differ only by a rotation around that common thrust direction. The paper defines this difference as
+Reduced attitude and full attitude have the same desired thrust direction. Therefore, they differ only by a rotation around that common thrust direction. With the left-multiplicative convention, this difference is
 
-\[q_{\mathrm{mix}} = q_{\mathrm{cmd,red}}^{-1} \otimes q_{\mathrm{cmd,full}}.\]
+\[q_{\mathrm{mix}} = q_{\mathrm{cmd,full}} \otimes q_{\mathrm{cmd,red}}^{-1}.\]
 
 This equation answers a simple question: **after reaching the reduced target, what rotation is still needed to reach the full target?** The same relation can be written as
 
-\[q_{\mathrm{cmd,full}} = q_{\mathrm{cmd,red}} \otimes q_{\mathrm{mix}}.\]
+\[q_{\mathrm{cmd,full}} = q_{\mathrm{mix}} \otimes q_{\mathrm{cmd,red}}.\]
 
-Under the paper’s convention, \(q_{\mathrm{mix}}\) has the form
+The axis of \(q_{\mathrm{mix}}\) is the common thrust direction in the world frame. Therefore, it has the form
 
-\[q_{\mathrm{mix}} = \begin{bmatrix} \cos(\alpha_{\mathrm{mix}}/2)\\ 0\\ 0\\ \sin(\alpha_{\mathrm{mix}}/2) \end{bmatrix}.\]
+\[q_{\mathrm{mix}} = \begin{bmatrix} \cos(\alpha_{\mathrm{mix}}/2)\\ \mathbf{b}_{3,d}\sin(\alpha_{\mathrm{mix}}/2) \end{bmatrix}.\]
 
 The angle \(\alpha_{\mathrm{mix}}\) is the twist angle between the reduced and full targets. It is not simply the Euler yaw error. It is the actual rotation around the target thrust axis that turns the reduced target into the full target.
 
@@ -187,9 +191,9 @@ The angle \(\alpha_{\mathrm{mix}}\) is the twist angle between the reduced and f
 
 Pure reduced attitude gives all priority to thrust direction. Pure full attitude tries to correct the thrust direction and yaw at the same time. The paper introduces mixing because yaw motion is usually slower than roll and pitch motion. In addition, the commanded angular-rate vector has a limited size. If the controller spends too much of that limited command on yaw, the quadrotor may tilt more slowly even when fast tilt is needed for the path.
 
-The mixed target uses only part of the twist from reduced attitude to full attitude:
+The mixed target uses only part of the world-frame twist from reduced attitude to full attitude:
 
-\[q_{\mathrm{cmd}} = q_{\mathrm{cmd,red}} \otimes \begin{bmatrix} \cos(p\alpha_{\mathrm{mix}}/2)\\ 0\\ 0\\ \sin(p\alpha_{\mathrm{mix}}/2) \end{bmatrix}, \qquad p\in[0,1].\]
+\[q_{\mathrm{cmd}} = \begin{bmatrix} \cos(p\alpha_{\mathrm{mix}}/2)\\ \mathbf{b}_{3,d}\sin(p\alpha_{\mathrm{mix}}/2) \end{bmatrix}\otimes q_{\mathrm{cmd,red}}, \qquad p\in[0,1].\]
 
 When \(p=0\), no twist is added, so the result is pure reduced attitude:
 
@@ -283,7 +287,7 @@ Next, use the limited thrust direction to build the reduced attitude target. Obt
 
 Once both targets exist, calculate
 
-\[q_{\mathrm{mix}} = q_{\mathrm{cmd,red}}^{-1} \otimes q_{\mathrm{cmd,full}}.\]
+\[q_{\mathrm{mix}} = q_{\mathrm{cmd,full}} \otimes q_{\mathrm{cmd,red}}^{-1}.\]
 
 Choose \(p\) based on how much yaw priority the task needs. Use the mixing formula to build the final target quaternion. Finally, calculate the quaternion attitude error and use the attitude control law to produce the commanded angular rate.
 
@@ -303,7 +307,7 @@ Reduced attitude control makes the thrust axis point correctly and does not dire
 
 The quaternion
 
-\[q_{\mathrm{mix}} = q_{\mathrm{cmd,red}}^{-1} \otimes q_{\mathrm{cmd,full}}\]
+\[q_{\mathrm{mix}} = q_{\mathrm{cmd,full}} \otimes q_{\mathrm{cmd,red}}^{-1}\]
 
 is the rotation still needed to move from the reduced target to the full target. Mixing takes only part of this rotation, so the quadrotor can tilt quickly for translation while yaw moves toward its target more slowly.
 
