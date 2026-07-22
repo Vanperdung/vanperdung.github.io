@@ -11,8 +11,8 @@ theme = "PaperMod"
       [markup.goldmark.extensions.passthrough]
         enable = true
         [markup.goldmark.extensions.passthrough.delimiters]
-          block = [['\[', '\]']]
-          inline = [['\(', '\)']]
+          block = [['\[', '\]'], ['$$', '$$']]
+          inline = [['\(', '\)'], ['$', '$']]
 
 [params]
   author = "vanperdung"
