@@ -783,6 +783,64 @@ Với cấu hình X đối xứng, điều kiện này tương ứng với
 
 \[\mathbf u_e= \begin{bmatrix} mg\\0\\0\\0 \end{bmatrix}.\]
 
+### 9.10. Tuyến tính hóa mô hình 3D quanh điểm cân bằng
+
+Ở trạng thái cân bằng, ta có:
+
+\[\mathbf r_e=\text{hằng số}, \qquad \mathbf v_e=\mathbf0, \qquad \mathbf q_e= \begin{bmatrix} 1\\0\\0\\0 \end{bmatrix}, \qquad \boldsymbol\omega_e=\mathbf0, \qquad \mathbf u_e= \begin{bmatrix} mg\\0\\0\\0 \end{bmatrix}.\]
+
+Vị trí cân bằng có thể là bất kỳ vị trí nào. Vì vậy, vị trí không xuất hiện trong các phương trình sai lệch. Ta dùng đầu vào sai lệch:
+
+\[\delta\mathbf u= \begin{bmatrix} \delta u_1\\\delta\tau_x\\\delta\tau_y\\\delta\tau_z \end{bmatrix} = \mathbf u-\mathbf u_e.\]
+
+Không nên dùng trực tiếp bốn thành phần quaternion làm bốn trạng thái sai lệch độc lập, vì quaternion đơn vị có ràng buộc:
+
+\[\mathbf q^\mathsf T\mathbf q=1.\]
+
+Thay vào đó, dùng vector góc nhỏ ba chiều:
+
+\[\delta\boldsymbol\theta= \begin{bmatrix} \delta\phi\\\delta\theta\\\delta\psi \end{bmatrix}, \qquad \mathbf q \approx \begin{bmatrix} 1\\\dfrac12\delta\boldsymbol\theta \end{bmatrix}.\]
+
+Ở đây, \(\delta\phi\), \(\delta\theta\), và \(\delta\psi\) là sai lệch roll, pitch, và yaw nhỏ. Vector trạng thái tuyến tính có \(12\) phần tử:
+
+\[\delta\mathbf x= \begin{bmatrix} \delta\mathbf r\\\delta\mathbf v\\\delta\boldsymbol\theta\\\delta\boldsymbol\omega \end{bmatrix}.\]
+
+Với góc nhỏ, hướng trục lực đẩy có xấp xỉ:
+
+\[R(\mathbf q)\mathbf e_3 \approx \mathbf e_3+\delta\boldsymbol\theta\times\mathbf e_3 = \begin{bmatrix} \delta\theta\\-\delta\phi\\1 \end{bmatrix}.\]
+
+Khai triển phương trình tịnh tiến và bỏ các tích của hai đại lượng sai lệch trở lên cho:
+
+\[\delta\dot{\mathbf v}= \begin{bmatrix} g\delta\theta\\-g\delta\phi\\\dfrac{\delta u_1}{m} \end{bmatrix}.\]
+
+Do đó, pitch dương tạo gia tốc theo \(+x\), roll dương tạo gia tốc theo \(-y\). Các dấu này đến từ quy ước lực đẩy theo \(+z\) thân và ma trận quay của phần trước.
+
+Từ động học quaternion tại hover:
+
+\[\delta\dot{\boldsymbol\theta}=\delta\boldsymbol\omega.\]
+
+Trong phương trình Euler, các tích \(pq\), \(pr\), và \(qr\) đều là bậc hai quanh \(\boldsymbol\omega_e=\mathbf0\). Chúng bị bỏ đi trong mô hình bậc nhất:
+
+\[\delta\dot{\boldsymbol\omega}=\mathbf I^{-1}\delta\boldsymbol\tau.\]
+
+Đặt:
+
+\[G= \begin{bmatrix} 0&g&0\\-g&0&0\\0&0&0 \end{bmatrix}.\]
+
+Mô hình tuyến tính có dạng:
+
+\[\delta\dot{\mathbf x}=A\delta\mathbf x+B\delta\mathbf u,\]
+
+với:
+
+\[A= \begin{bmatrix} \mathbf0_{3\times3}&I_3&\mathbf0_{3\times3}&\mathbf0_{3\times3}\\ \mathbf0_{3\times3}&\mathbf0_{3\times3}&G&\mathbf0_{3\times3}\\ \mathbf0_{3\times3}&\mathbf0_{3\times3}&\mathbf0_{3\times3}&I_3\\ \mathbf0_{3\times3}&\mathbf0_{3\times3}&\mathbf0_{3\times3}&\mathbf0_{3\times3} \end{bmatrix},\]
+
+\[B= \begin{bmatrix} \mathbf0_{3\times1}&\mathbf0_{3\times3}\\ \dfrac1m\mathbf e_3&\mathbf0_{3\times3}\\ \mathbf0_{3\times1}&\mathbf0_{3\times3}\\ \mathbf0_{3\times1}&\mathbf I^{-1} \end{bmatrix}.\]
+
+Mô hình này cho thấy cấu trúc gần hover: lực đẩy sai lệch tác động trực tiếp lên gia tốc thẳng đứng; roll và pitch tác động lên gia tốc ngang; mô-men tác động lên gia tốc góc. Yaw không tác động trực tiếp lên vị trí ở bậc nhất, nhưng mô-men yaw vẫn điều khiển vận tốc góc quanh trục \(z\).
+
+Mô hình chỉ hợp lệ gần hover với góc và vận tốc góc nhỏ. Khi quadcopter nghiêng mạnh, quay nhanh, hoặc có lực cản khí động học đáng kể, cần dùng lại mô hình phi tuyến của Mục 9.8 hoặc tuyến tính hóa quanh điểm làm việc mới.
+
 ---
 
 ## 10. Vị trí của mô hình trong hệ thống điều khiển
