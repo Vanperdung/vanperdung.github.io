@@ -32,7 +32,7 @@ theme = "PaperMod"
 
   [params.homeInfoParams]
     Title = "Hi, I'm vanperdung"
-    Content = "This is where I store things - programming, OS, tools, and more."
+    Content = "This is where I store random things."
 
   [[params.socialIcons]]
     name = "github"
