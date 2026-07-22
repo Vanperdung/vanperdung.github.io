@@ -27,8 +27,9 @@ theme = "PaperMod"
 
   [params.viewCounter]
     enabled = true
-    namespace = "vanperdung-github-io"
-    apiURL = "https://api.counterapi.dev/v1"
+    site = "vanperdung.github.io"
+    scriptURL = "https://page-views-api.ratneshc.com/script"
+    apiURL = "https://page-views-api.ratneshc.com/api/v1"
 
   [params.homeInfoParams]
     Title = "Hi, I'm vanperdung"

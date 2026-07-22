@@ -16,7 +16,7 @@ window.MathJax = {
 
 {{- with site.Params.viewCounter }}
   {{- if and .enabled hugo.IsProduction $.IsPage }}
-<meta name="view-counter-key" content="{{ $.File.Path | sha1 }}">
+<script src="{{ .scriptURL | default "https://page-views-api.ratneshc.com/script" }}" data-site="{{ .site }}" data-path="{{ $.RelPermalink }}" defer></script>
   {{- end }}
 {{- end }}
 
