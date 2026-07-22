@@ -25,6 +25,11 @@ theme = "PaperMod"
   ShowCodeCopyButtons = true
   ShowToc = true
 
+  [params.viewCounter]
+    enabled = true
+    namespace = "vanperdung-github-io"
+    apiURL = "https://api.counterapi.dev/v1"
+
   [params.homeInfoParams]
     Title = "Hi, I'm vanperdung"
     Content = "This is where I store things - programming, OS, tools, and more."

@@ -1,0 +1,50 @@
+{{- with site.Params.viewCounter }}
+  {{- if and .enabled hugo.IsProduction }}
+<script>
+  (() => {
+    const counterKey = document.querySelector('meta[name="view-counter-key"]')?.content;
+    const postMeta = document.querySelector('.post-single .post-meta');
+    const namespace = {{ .namespace | jsonify | safeJS }};
+    const apiURL = {{ .apiURL | default "https://api.counterapi.dev/v1" | jsonify | safeJS }};
+
+    if (!counterKey || !postMeta || !namespace) return;
+
+    const container = document.createElement('span');
+    container.className = 'view-counter-container';
+    container.append(document.createTextNode('\u00a0·\u00a0'));
+
+    const counter = document.createElement('span');
+    counter.className = 'view-counter';
+    counter.setAttribute('aria-live', 'polite');
+    counter.textContent = 'Loading views';
+    container.append(counter);
+    postMeta.append(container);
+
+    let increment = true;
+    try {
+      const storageKey = `view-counter:${namespace}:${counterKey}`;
+      if (sessionStorage.getItem(storageKey)) {
+        increment = false;
+      } else {
+        sessionStorage.setItem(storageKey, '1');
+      }
+    } catch (_) {
+      // Count the view when session storage is unavailable.
+    }
+
+    const endpoint = `${apiURL.replace(/\/$/, '')}/${encodeURIComponent(namespace)}/${encodeURIComponent(counterKey)}${increment ? '/up' : ''}`;
+    fetch(endpoint, { cache: 'no-store', credentials: 'omit' })
+      .then((response) => {
+        if (!response.ok) throw new Error('View counter request failed');
+        return response.json();
+      })
+      .then(({ count }) => {
+        const views = Number(count);
+        if (!Number.isFinite(views)) throw new Error('Invalid view count');
+        counter.textContent = `${views.toLocaleString()} views`;
+      })
+      .catch(() => container.remove());
+  })();
+</script>
+  {{- end }}
+{{- end }}

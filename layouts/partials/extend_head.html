@@ -14,6 +14,12 @@ window.MathJax = {
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 {{- end }}
 
+{{- with site.Params.viewCounter }}
+  {{- if and .enabled hugo.IsProduction $.IsPage }}
+<meta name="view-counter-key" content="{{ $.File.Path | sha1 }}">
+  {{- end }}
+{{- end }}
+
 {{- if .Param "mermaid" }}
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
